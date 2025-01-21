@@ -1,0 +1,122 @@
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import os
+import requests
+
+load_dotenv()
+
+# Load API passcode
+API_PASSCODE = os.getenv("API_PASSCODE")
+
+try:
+    with open("/etc/secrets/API_PASSCODE", "r") as file:
+        API_PASSCODE = file.read().strip()
+except FileNotFoundError:
+    print("API_PASSCODE file not found. Please make sure the file exists at /etc/secrets/API_PASSCODE")
+    exit(1)
+
+app = FastAPI()
+
+# Dependency for verifying the passcode
+security = HTTPBasic()
+
+def verify_passcode(credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.password != API_PASSCODE:
+        raise HTTPException(status_code=401, detail="Incorrect passcode")
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to CISO GenAI Incubator Environment API"}
+
+@app.post("/generate")
+def generate_content(
+    prompt: str,
+    image: str = None,
+    credentials: HTTPBasicCredentials = Depends(verify_passcode),
+):
+    """
+    Existing generate content API.
+    """
+    try:
+        # Simulating generation logic
+        return {"generated_text": f"Generated content for prompt: {prompt}", "image": image}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating content: {str(e)}")
+
+@app.post("/enumerator")
+def enumerator_api(
+    cloud_provider: str,
+    role_data: str,
+    credentials: HTTPBasicCredentials = Depends(verify_passcode),
+):
+    """
+    New enumerator API that calls the `/generate` endpoint.
+    """
+    try:
+        # Use the existing `/generate` API
+        response = requests.post(
+            "http://127.0.0.1:8000/generate",  # URL of the internal API
+            json={"prompt": role_data, "image": cloud_provider},  # Payload
+            auth=(credentials.username, credentials.password),
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise HTTPException(status_code=response.status_code, detail=f"Generate API error: {response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Enumerator API failed: {str(e)}"
+
+streamlit ui
+import streamlit as st
+import requests
+
+# Base URL for FastAPI
+API_BASE_URL = "http://127.0.0.1:8000"
+
+st.markdown("# I Am Enumerator")
+st.info(
+    """
+    This AI-assisted tool is designed to support, not replace, cybersecurity professionals.
+    Users must critically review all outputs, exercise judgment, and ensure compliance with all relevant policies and standards.
+    """
+)
+
+# Input section
+cloud_provider = st.selectbox("Select Cloud Provider", ["AWS", "Azure", "GCP"])
+uploaded_file = st.file_uploader("Upload a JSON File", type=["json"])
+json_input = st.text_area("... or copy/paste JSON data below", height=200, key="json_input_area")
+response_container = st.empty()
+
+# Function to call the enumerator API
+def call_enumerator_api(cloud_provider, role_data):
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/enumerator",
+            json={"cloud_provider": cloud_provider, "role_data": role_data},
+            auth=("username", "password"),  # Replace with valid credentials
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
+            return None
+    except Exception as e:
+        st.error(f"API call failed: {e}")
+        return None
+
+# Handle input
+if st.button("Analyze Role"):
+    role_data = None
+    if uploaded_file is not None:
+        role_data = uploaded_file.read().decode()
+    elif json_input:
+        role_data = json_input
+    
+    if role_data:
+        with st.spinner("Analyzing role..."):
+            result = call_enumerator_api(cloud_provider, role_data)
+            if result:
+                response_container.markdown(f"### Analysis Results:\n{result['generated_text']}")
+    else:
+        st.error("Please provide role data via file upload or text input.")
