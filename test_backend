@@ -1,0 +1,198 @@
+from fastapi.testclient import TestClient
+from unittest.mock import patch
+from main import app
+import pytest
+import asyncio
+from time import sleep
+
+client = TestClient(app)
+
+# Test Successful Prompt Processing
+def test_enumerator_api_success():
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "The role of Security Engineer in AWS involves monitoring and improving security infrastructure."}
+    )
+    assert response.status_code == 200
+    assert "response" in response.json()
+    assert "hyperparameters" in response.json()
+
+# Test Missing Prompt in Request
+def test_enumerator_api_missing_prompt():
+    response = client.post("/enumerator", json={})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "field required"
+
+# Test Empty Prompt
+def test_enumerator_api_empty_prompt():
+    response = client.post("/enumerator", json={"prompt": ""})
+    assert response.status_code == 400  # Assuming you handle empty prompts in the backend
+    assert response.json()["detail"] == "Prompt cannot be empty."
+
+# Test Long Prompt
+def test_enumerator_api_long_prompt():
+    long_prompt = "A" * 10000  # A very long prompt
+from fastapi.testclient import TestClient
+from unittest.mock import patch
+from main import app
+import pytest
+import asyncio
+from time import sleep
+
+client = TestClient(app)
+
+# Test Successful Prompt Processing
+def test_enumerator_api_success():
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "The role of Security Engineer in AWS involves monitoring and improving security infrastructure."}
+    )
+    assert response.status_code == 200
+    assert "response" in response.json()
+    assert "hyperparameters" in response.json()
+
+# Test Missing Prompt in Request
+def test_enumerator_api_missing_prompt():
+    response = client.post("/enumerator", json={})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "field required"
+
+# Test Empty Prompt
+def test_enumerator_api_empty_prompt():
+    response = client.post("/enumerator", json={"prompt": ""})
+    assert response.status_code == 400  # Assuming you handle empty prompts in the backend
+    assert response.json()["detail"] == "Prompt cannot be empty."
+
+# Test Long Prompt
+def test_enumerator_api_long_prompt():
+    long_prompt = "A" * 10000  # A very long prompt
+    response = client.post("/enumerator", json={"prompt": long_prompt})
+    assert response.status_code == 200
+    assert "response" in response.json()
+    assert "hyperparameters" in response.json()
+
+# Test Invalid JSON Input
+def test_enumerator_api_invalid_json():
+    response = client.post(
+        "/enumerator",
+        data="Invalid JSON String",  # Send malformed JSON
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 422
+
+# Test Backend Exception Handling
+@patch("main.generate_content", side_effect=Exception("Mocked exception"))
+def test_enumerator_api_internal_error(mock_generate_content):
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "The role of Security Engineer in AWS involves monitoring and improving security infrastructure."}
+    )
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Error processing prompt: Mocked exception"
+
+# Test Non-JSON Content-Type
+def test_enumerator_api_invalid_content_type():
+    response = client.post(
+        "/enumerator",
+        data="Non-JSON input",
+        headers={"Content-Type": "text/plain"}
+    )
+    assert response.status_code == 415  # Unsupported Media Type
+
+# Test Concurrency (Multiple Requests)
+async def send_request():
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "Test prompt for concurrency."}
+    )
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_enumerator_api_concurrent_requests():
+    tasks = [send_request() for _ in range(10)]  # Simulate 10 concurrent requests
+    await asyncio.gather(*tasks)
+
+# Test Prompt with Special Characters
+def test_enumerator_api_special_characters_prompt():
+    special_prompt = "This prompt contains special characters: @#$%^&*()!"
+    response = client.post("/enumerator", json={"prompt": special_prompt})
+    assert response.status_code == 200
+    assert "response" in response.json()
+
+# Test Prompt with Non-English Characters
+def test_enumerator_api_non_english_characters():
+    non_english_prompt = "角色安全工程师的职责包括监控和改进安全基础设施。"
+    response = client.post("/enumerator", json={"prompt": non_english_prompt})
+    assert response.status_code == 200
+    assert "response" in response.json()
+
+# Test Slow Backend Response
+def mock_generate_content_slow(prompt):
+    sleep(5)  # Simulate a delay
+    return "Mocked response", {"length": len(prompt)}
+
+@patch("main.generate_content", side_effect=mock_generate_content_slow)
+def test_enumerator_api_slow_response(mock_generate_content):
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "Test prompt for slow response."}
+    )
+    assert response.status_code == 200
+    assert "response" in response.json()
+
+# Test API Documentation (/docs)
+def test_api_docs():
+    response = client.get("/docs")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]￼Enter    response = client.post("/enumerator", json={"prompt": long_prompt})
+    assert response.status_code == 200
+    assert "response" in response.json()
+    assert "hyperparameters" in response.json()
+
+# Test Invalid JSON Input
+def test_enumerator_api_invalid_json():
+    response = client.post(
+        "/enumerator",
+        data="Invalid JSON String",  # Send malformed JSON
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 422
+
+# Test Backend Exception Handling
+@patch("main.generate_content", side_effect=Exception("Mocked exception"))
+def test_enumerator_api_internal_error(mock_generate_content):
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "The role of Security Engineer in AWS involves monitoring and improving security infrastructure."}
+    )
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Error processing prompt: Mocked exception"
+
+# Test Non-JSON Content-Type
+def test_enumerator_api_invalid_content_type():
+sponse = client.post(
+        "/enumerator",
+        data="Non-JSON input",
+        headers={"Content-Type": "text/plain"}
+    )
+    assert response.status_code == 415  # Unsupported Media Type
+
+# Test Concurrency (Multiple Requests)
+async def send_request():
+    response = client.post(
+        "/enumerator",
+        json={"prompt": "Test prompt for concurrency."}
+    )
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_enumerator_api_concurrent_requests():
+    tasks = [send_request() for _ in range(10)]  # Simulate 10 concurrent requests
+    await asyncio.gather(*tasks)
+
+# Test Prompt with Special Characters
+def test_enumerator_api_special_characters_prompt():
+    special_prompt = "This prompt contains special characters: @#$%^&*()!"
+    response = client.post("/enumerator", json={"prompt": special_prompt})
+    assert response.status_code == 200
+    assert "response" in response.json()
