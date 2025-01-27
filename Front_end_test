@@ -1,0 +1,236 @@
+from unittest.mock import patch
+import pytest
+import streamlit as st
+import json
+
+# Test 1: Cloud Provider Selection
+@patch("requests.post")
+def test_cloud_provider_selection(mock_post):
+    """
+    Test case for cloud provider selection only.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Simulate cloud provider selection
+    st.session_state["cloud_provider"] = "AWS"
+
+    # Run the Streamlit app
+    main()
+
+    # Assert no API call is made since only the cloud provider is selected
+    mock_post.assert_not_called()
+
+    # Assert that the cloud provider is properly set
+    assert st.session_state["cloud_provider"] == "AWS"
+
+
+# Test 2: Role Data as Typed JSON
+@patch("requests.post")
+def test_json_input(mock_post):
+    """
+    Test case for role data entered as JSON in the text area.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Mock the POST request
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {
+        "response": "Test response for JSON input.",
+        "hyperparameters": {"length": 42}
+    }
+
+    # Simulate user selecting a cloud provider and entering JSON input
+    st.session_state["cloud_provider"] = "Azure"
+    st.session_state["json_input"] = json.dumps({
+        "role": "Security Engineer",
+        "responsibilities": "Ensure infrastructure security"
+    })
+
+    # Run the Streamlit app
+    main()
+
+    # Assert the API call is made with the correct payload
+    mock_post.assert_called_once_with(
+from unittest.mock import patch
+import pytest
+import streamlit as st
+import json
+
+# Test 1: Cloud Provider Selection
+@patch("requests.post")
+def test_cloud_provider_selection(mock_post):
+    """
+    Test case for cloud provider selection only.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Simulate cloud provider selection
+    st.session_state["cloud_provider"] = "AWS"
+
+    # Run the Streamlit app
+    main()
+
+    # Assert no API call is made since only the cloud provider is selected
+    mock_post.assert_not_called()
+
+    # Assert that the cloud provider is properly set
+    assert st.session_state["cloud_provider"] == "AWS"
+
+
+# Test 2: Role Data as Typed JSON
+@patch("requests.post")
+def test_json_input(mock_post):
+    """
+    Test case for role data entered as JSON in the text area.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Mock the POST request
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {
+        "response": "Test response for JSON input.",
+        "hyperparameters": {"length": 42}
+    }
+
+    # Simulate user selecting a cloud provider and entering JSON input
+    st.session_state["cloud_provider"] = "Azure"
+    st.session_state["json_input"] = json.dumps({
+        "role": "Security Engineer",
+        "responsibilities": "Ensure infrastructure security"
+    })
+
+    # Run the Streamlit app
+    main()
+
+    # Assert the API call is made with the correct payload
+    mock_post.assert_called_once_with(
+        "http://127.0.0.1:8000/enumerator",
+        json={
+            "prompt": "The role of Security Engineer in Azure involves ensuring infrastructure security."
+        }
+    )
+
+    # Assert that the response from the API is handled correctly
+    assert mock_post.return_value.json()["response"] == "Test response for JSON input."
+
+
+# Test 3: Role Data via File Upload
+@patch("requests.post")
+@patch("streamlit.file_uploader")
+def test_json_file_upload(mock_file_uploader, mock_post):
+    """
+    Test case for role data uploaded via a JSON file.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Mock the POST request
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {
+        "response": "Test response for file upload.",
+        "hyperparameters": {"length": 42}
+    }
+
+    # Mock file upload
+    mock_file_uploader.return_value = '{"role": "Developer", "responsibilities": "Build and deploy applications"}'
+
+    # Simulate cloud provider selection
+    st.session_state["cloud_provider"] = "GCP"
+
+    # Run the Streamlit app
+    main()
+
+    # Assert the API call is made with the correct payload
+    mock_post.assert_called_once_with(
+        "http://127.0.0.1:8000/enumerator",
+        json={
+            "prompt": "The role of Developer in GCP involves building and deploying applications."
+        }
+    )
+
+    # Assert that the response from the API is handled correctly
+    assert mock_post.return_value.json()["response"] == "Test response for file upload."
+
+
+# Test 4: Invalid JSON Input
+def test_invalid_json_input():
+    """
+    Test case for invalid JSON input.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Simulate invalid JSON input
+    st.session_state["cloud_provider"] = "AWS"
+    st.session_state["json_input"] = "INVALID_JSON"
+
+    # Run the Streamlit app and expect a JSONDecodeError
+    with pytest.raises(json.JSONDecodeError):
+        main()
+
+
+# Test 5: Missing Cloud Provider
+def test_missing_cloud_provider():
+    """
+    Test case for missing cloud provider selection.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Simulate missing cloud provider selection
+    st.session_state["cloud_provider"] = ""
+
+    # Run the Streamlit app
+    main()
+
+    # Assert that no API call is made
+    # Add logic to ensure the app prompts the user to select a cloud provider
+    assert not st.session_state.get("cloud_provider", None), "Cloud provider is missing, but app did not catch it."￼Enter        "http://127.0.0.1:8000/enumerator",
+        json={
+            "prompt": "The role of Security Engineer in Azure involves ensuring infrastructure security."
+        }
+    )
+
+    # Assert that the response from the API is handled correctly
+    assert mock_post.return_value.json()["response"] == "Test response for JSON input."
+
+
+# Test 3: Role Data via File Upload
+@patch("requests.post")
+@patch("streamlit.file_uploader")
+def test_json_file_upload(mock_file_uploader, mock_post):
+    """
+    Test case for role data uploaded via a JSON file.
+    """
+    from your_frontend_file import main  # Replace `your_frontend_file` with your Streamlit file name
+
+    # Mock the POST request
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {
+        "response": "Test response for file upload.",
+        "hyperparameters": {"length": 42}
+    }
+
+Mock file upload
+    mock_file_uploader.return_value = '{"role": "Developer", "responsibilities": "Build and deploy applications"}'
+
+    # Simulate cloud provider selection
+    st.session_state["cloud_provider"] = "GCP"
+
+    # Run the Streamlit app
+    main()
+
+    # Assert the API call is made with the correct payload
+    mock_post.assert_called_once_with(
+        "http://127.0.0.1:8000/enumerator",
+        json={
+            "prompt": "The role of Developer in GCP involves building and deploying applications."
+        }
+    )
+
+    # Assert that the response from the API is handled correctly
+    assert mock_post.return_value.json()["response"] == "Test response for file upload."
+
+
+# Test 4: Invalid JSON Input
+def test_invalid_json_input():
+    """
+    Test case for invalid JSON input.
+    """
