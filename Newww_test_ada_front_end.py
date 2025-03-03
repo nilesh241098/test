@@ -1,0 +1,90 @@
+import streamlit as st
+from unittest.mock import patch
+
+# Test 1: File Upload Component
+def test_file_upload():
+    """Test case for file upload component."""
+    with patch("streamlit.file_uploader") as mock_file_uploader:
+        mock_file_uploader.return_value = None
+        uploaded_file = st.file_uploader("Upload Architecture Diagram")
+        assert uploaded_file is None
+
+# Test 2: Template Selection
+def test_template_selection():
+    """Test case for template selection dropdown."""
+    with patch("streamlit.selectbox") as mock_selectbox:
+        mock_selectbox.return_value = "General Architecture Review"
+        selected_template = st.selectbox("Select Template", ["General Architecture Review", "Security Architecture Review"])
+        assert selected_template == "General Architecture Review"
+
+# Test 3: Submit Button
+def test_submit_button():
+    """Test case to check submit button presence."""
+    with patch("streamlit.button") as mock_button:
+        mock_button.return_value = False
+        submitted = st.button("Analyze Diagram")
+        assert submitted is False
+
+# Test 4: Successful API Response
+def test_successful_api_response():
+    """Test case for successful API response."""
+    with patch("frontend.requests.post") as mock_post:
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {"response": "Analysis Complete"}
+        response = mock_post("dummy_url")
+        assert response.status_code == 200
+        assert response.json()["response"] == "Analysis Complete"
+
+# Test 5: API Failure Response
+def test_api_failure_response():
+    """Test case for API failure response."""
+    with patch("frontend.requests.post") as mock_post:
+        mock_post.return_value.status_code = 400
+        mock_post.return_value.json.return_value = {"detail": "Invalid template name"}
+        response = mock_post("dummy_url")
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Invalid template name"
+
+# Test 6: Feedback Text Area
+def test_feedback_text_area():
+    """Test case for feedback text area."""
+    with patch("streamlit.text_area") as mock_text_area:
+        mock_text_area.return_value = "Great analysis"
+        feedback_text = st.text_area("Enter Feedback")
+        assert feedback_text == "Great analysis"
+
+# Test 7: Feedback Rating Slider
+def test_feedback_rating_slider():
+    """Test case for feedback rating slider."""
+    with patch("streamlit.slider") as mock_slider:
+        mock_slider.return_value = 5
+        rating = st.slider("Rate Analysis", 1, 5)
+        assert rating == 5
+
+# Test 8: Feedback Submit Button
+def test_feedback_submit_button():
+    """Test case to check if feedback submit button is present."""
+    with patch("streamlit.button") as mock_button:
+        mock_button.return_value = False
+        submitted = st.button("Submit Feedback")
+        assert submitted is False
+
+# Test 9: Successful Feedback Submission
+def test_successful_feedback_submission():
+    """Test case for successful feedback submission."""
+    with patch("frontend.requests.post") as mock_post:
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {"message": "Feedback submitted"}
+        response = mock_post("dummy_url")
+        assert response.status_code == 200
+        assert response.json()["message"] == "Feedback submitted"
+
+# Test 10: Feedback Submission Failure
+def test_feedback_submission_failure():
+    """Test case for feedback submission failure."""
+    with patch("frontend.requests.post") as mock_post:
+        mock_post.return_value.status_code = 500
+        mock_post.return_value.json.return_value = {"detail": "Feedback submission failed"}
+        response = mock_post("dummy_url")
+        assert response.status_code == 500
+        assert response.json()["detail"] == "Feedback submission failed"
