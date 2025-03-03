@@ -88,3 +88,30 @@ def test_feedback_submission_failure():
         response = mock_post("dummy_url")
         assert response.status_code == 500
         assert response.json()["detail"] == "Feedback submission failed"
+from unittest.mock import patch, MagicMock
+import streamlit as st
+
+@patch("streamlit.file_uploader")
+@patch("requests.post")
+def test_invalid_image_upload(mock_post, mock_file_uploader):
+    """Test uploading an invalid image file (e.g., a .txt file instead of an image)."""
+
+    # Simulate an invalid file upload (text file instead of image)
+    mock_file = MagicMock()
+    mock_file.name = "invalid_file.txt"
+    mock_file.read.return_value = b"This is not an image file"
+    mock_file_uploader.return_value = mock_file
+
+    # Mock API response for invalid file format
+    mock_post.return_value.status_code = 400
+    mock_post.return_value.json.return_value = {"detail": "Invalid image format"}
+
+    # Run the function that processes the upload
+    with patch("streamlit.error") as mock_error:
+        process_upload()  # Replace with actual function handling upload
+
+        # Ensure the API was called
+        mock_post.assert_called_once()
+
+        # Ensure Streamlit shows an error message
+        mock_error.assert_called_once_with("Invalid image format")
