@@ -115,3 +115,48 @@ def test_invalid_image_upload(mock_post, mock_file_uploader):
 
         # Ensure Streamlit shows an error message
         mock_error.assert_called_once_with("Invalid image format")
+
+
+from unittest.mock import patch, MagicMock
+import streamlit as st
+import pytest
+from PIL import UnidentifiedImageError
+
+# Test 1: Valid Image Upload
+@patch("streamlit.file_uploader")
+def test_valid_image_upload(mock_file_uploader):
+    """Test case to verify that a valid image file is successfully uploaded."""
+    
+    # Mock a valid image file
+    mock_file = MagicMock()
+    mock_file.name = "valid_image.png"
+    mock_file.read.return_value = b"\x89PNG\r\n\x1a\n"  # Simulating PNG file signature
+    mock_file_uploader.return_value = mock_file
+
+    # Simulate file upload
+    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
+
+    assert uploaded_file is not None, "File upload failed"
+    assert uploaded_file.name.endswith(("png", "jpg", "jpeg")), "Uploaded file is not an image"
+
+
+# Test 2: Invalid Image Upload
+@patch("streamlit.file_uploader")
+def test_invalid_image_upload(mock_file_uploader):
+    """Test case to verify that an invalid image file is caught."""
+
+    # Mock an invalid image file (text file)
+    mock_file = MagicMock()
+    mock_file.name = "invalid_file.txt"
+    mock_file.read.return_value = b"This is not an image file"
+    mock_file_uploader.return_value = mock_file
+
+    # Simulate file upload
+    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
+
+    assert uploaded_file is not None, "File upload failed"
+
+    # Validate image parsing with PIL (will raise UnidentifiedImageError)
+    with pytest.raises(UnidentifiedImageError):
+        from PIL import Image
+        Image.open(uploaded_file.read())  # This should fail for a non-image file
