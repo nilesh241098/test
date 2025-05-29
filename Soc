@@ -1,0 +1,34 @@
+## Task
+
+You are an expert at visualizing event logs into diagrams. Below is a timeline and summary of some events:
+
+$analysis_response
+
+## Instructions:
+
+Analyze the summary and generate a structured JSON object representing the key entities and their relationships.
+
+## Output Format:
+
+Return a JSON object with the following format:
+
+{
+  "elements": [
+    {
+      "id": "node1",
+      "label": "Description of Node 1",
+      "relationships": [
+        {
+          "target": "node2",
+          "type": "Edge Label (if any)"
+        }
+      ]
+    },
+    {
+      "id": "node2",
+      "label": "Description of Node 2"
+    }
+  ]
+}
+
+Do not include any text or explanation—only valid JSON.
